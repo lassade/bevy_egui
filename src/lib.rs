@@ -238,7 +238,7 @@ impl EguiContext {
     /// Egui context of the primary window.
     #[track_caller]
     pub fn ctx(&self) -> &egui::CtxRef {
-        &self.ctx[&WindowId::primary()]
+        self.ctx.get(&WindowId::primary()).expect("`EguiContext::ctx()` called before the ctx has been initialized. Consider moving your UI system to `CoreStage::Update` or run you system after `EguiSystem::BeginFrame`.")
     }
 
     /// Egui context for a specific window.
@@ -251,6 +251,11 @@ impl EguiContext {
             .get(&window)
             .ok_or_else(|| format!("window with id {} not found", window))
             .unwrap()
+    }
+
+    /// Fallible variant of [`EguiContext::ctx_for_window`]. Make sure to set up the render graph by calling [`setup_pipeline`].
+    pub fn try_ctx_for_window(&self, window: WindowId) -> Option<&egui::CtxRef> {
+        self.ctx.get(&window)
     }
 
     /// Can accept either a strong or a weak handle.
